@@ -26,10 +26,11 @@ function love.load()
 		}
 	}
 
-	unit = math.min(love.graphics.getDimensions()) / 3.5
+	local w, h = love.graphics.getDimensions()
+	unit = math.min(w, h) / 3.5
 	noiseUnit = 43/17
 
-	camera = Camera.new(0, 0)
+	camera = Camera.new(0, 0, 1.8*w*h)
 
 	player = Sprite(images.alien.blue, 0, 0, -TURN/4, 0.45, 0.5)
 	player.r = 35  -- collision radius
@@ -143,10 +144,18 @@ function love.draw()
 	player:draw()
 end
 
+local function toggleFullscreen()
+	local fullscreen = love.window.getFullscreen()
+	love.window.setFullscreen(not fullscreen, 'desktop')
+end
+
 function love.keypressed(k, s)
+	local alt = love.keyboard.isDown('lalt', 'ralt')
 	if k == 'escape' then
 		love.event.quit()
 	elseif k == 'space' then
 		level1:generate(blocks)
+	elseif k == 'f11' or (alt and k == 'return') then
+		toggleFullscreen()
 	end
 end
