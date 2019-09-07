@@ -1,10 +1,12 @@
+local G = require 'geometry'
 local Grid = require 'grid'
 
 local TileMap = Grid:extend()
 
-function TileMap.set(self, img, unit, names)
+function TileMap.set(self, img, unit, radius, names)
 	Grid.set(self, unit)
 	self.img = img
+	self.radius = self.radius or 0
 	self.names = names
 
 	-- Generate quads.
@@ -52,6 +54,33 @@ function TileMap.at(self, col, row, tile)
 	end
 
 	return Grid.at(self, col, row, tile)
+end
+
+local function circleOverlapsTile(self, col, row, cx, cy, r)
+	local dx, dy = self:toPixel(col, row)
+	dx, dy = cx - dx, cy - dy
+	r = r + self.radius
+	local s = self.unit - 2 * self.radius
+	return G.circleOverlapsSquare(dx, dy, r, s)
+end
+
+local nineDirections = {
+	{-1,-1}, {0,-1}, {1,-1},
+	{-1,0},  {0,0},  {1,0},
+	{-1,1},  {0,1},  {1,1}
+}
+
+function TileMap.circleOverlaps(self, cx, cy, r)
+	local collisions = {}
+	local col0, row0 = self:fromPixel(cx, cy)
+	for _,dir in ipairs(nineDirections) do
+		local col, row = col0 + dir[1], row0 + dir[2]
+		if self:at(col, row) then
+			local hit = {circleOverlapsTile(self, col, row, cx, cy, r)}
+			if hit[1] then table.insert(collisions, hit) end
+		end
+	end
+	return collisions
 end
 
 return TileMap

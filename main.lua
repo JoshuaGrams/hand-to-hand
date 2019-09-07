@@ -1,4 +1,5 @@
 local Camera = require 'camera'
+local G = require 'geometry'
 local kb = require 'scancode'
 local Level = require 'level'
 local Sprite = require 'sprite'
@@ -30,11 +31,12 @@ function love.load()
 
 	camera = Camera.new(0, 0)
 
-	player = Sprite(images.alien.blue, 0, 0, -TURN/4, 0.42, 0.5)
+	player = Sprite(images.alien.blue, 0, 0, -TURN/4, 0.45, 0.5)
+	player.r = 35  -- collision radius
 	player.dx, player.dy = 0, 0  -- linear velocity
 	player.vMax = 500
-	player.vMin = 5
-	player.vDecay = 3
+	player.vMin = 1
+	player.vDecay = 5
 	player.aMax = player.vMax / 0.6
 	player.om = 0  -- angular velocity (omega)
 	player.omMax = 0.9 * TURN
@@ -42,7 +44,7 @@ function love.load()
 	player.omDecay = 0.8
 	player.alMax = player.omMax / 0.2
 
-	blocks = TileMap(images.blocks, 256, {
+	blocks = TileMap(images.blocks, 256, 32, {
 		'sand', 'soil', 'grass',
 		'ice', 'purple', 'zigzag'
 	})
@@ -58,6 +60,22 @@ function love.load()
 	level1:generate(blocks)
 end
 
+local function collidePlayer(p, map)
+	local e = 0.6  -- elasticity (0 to 1)
+	local collisions = map:circleOverlaps(p.x, p.y, p.r)
+	for _,c in ipairs(collisions) do
+		local nx, ny, ov = unpack(c)
+		player.x = player.x + nx * ov
+		player.y = player.y + ny * ov
+
+		local away = player.dx * nx + player.dy * ny
+		if away < 0 then
+			player.dx = player.dx - (1+e) * away * nx
+			player.dy = player.dy - (1+e) * away * ny
+		end
+	end
+end
+
 function love.update(dt)
 	local cx, cy = kb.stick('right', 'left', 'up', 'down')
 
@@ -70,7 +88,8 @@ function love.update(dt)
 	player.th = U.wrapAngle(player.th + player.om * dt)
 
 	local fx, fy = math.cos(player.th), math.sin(player.th)
-	local dv = math.max(0, cy) * player.aMax * dt
+	if cy < 0 then cy = 0.3 * cy end
+	local dv = cy * player.aMax * dt
 	local dx = player.dx + dv * fx
 	local dy = player.dy + dv * fy
 	local v0 = player.dx*player.dx + player.dy * player.dy
@@ -85,6 +104,8 @@ function love.update(dt)
 	end
 	player.x = player.x + player.dx * dt
 	player.y = player.y + player.dy * dt
+
+	collidePlayer(player, blocks)
 
 	camera:follow(player.x, player.y, dt, 0.4, 0.95)
 end
