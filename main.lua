@@ -157,11 +157,9 @@ function love.draw()
 	local len = playerTrail:length()
 	for i=#ghosts,1,-1 do
 		local d = 100 * i
-		if d <= len then
-			local ghost = ghosts[i]
-			ghost.x, ghost.y, ghost.th = playerTrail:at(d)
-			ghost:draw()
-		end
+		local ghost = ghosts[i]
+		ghost.x, ghost.y, ghost.th = playerTrail:at(d)
+		ghost:draw()
 	end
 	player:draw()
 end

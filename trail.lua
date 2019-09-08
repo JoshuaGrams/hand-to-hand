@@ -54,8 +54,14 @@ function Trail.at(self, d)
 	local x0, y0 = unpack(self, i0, i0+1)
 	local x1, y1 = unpack(self, i1, i1+1)
 	local dx, dy = x1 - x0, y1 - y0
-	local t = (d % self.d) / math.sqrt(dx*dx + dy*dy)
-	local th = math.atan2(dy, dx)
+	local d2 = dx*dx + dy*dy
+	local t, th
+	if d2 < 0.1 then
+		t, th = 0, -TURN/4
+	else
+		t = (d % self.d) / math.sqrt(d2)
+		th = math.atan2(dy, dx)
+	end
 	return x0 + dx * t, y0 + dy * t, th
 end
 
