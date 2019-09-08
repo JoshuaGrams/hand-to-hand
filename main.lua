@@ -4,6 +4,7 @@ local kb = require 'scancode'
 local Level = require 'level'
 local Sprite = require 'sprite'
 local TileMap = require 'tilemap'
+local Trail = require 'trail'
 local U = require 'util'
 
 TURN = 2*math.pi
@@ -44,6 +45,16 @@ function love.load()
 	player.omMin = 0.01 * TURN
 	player.omDecay = 0.8
 	player.alMax = player.omMax / 0.2
+
+	ghosts = {}
+	local aliens = {images.alien.blue, images.alien.green, images.alien.pink}
+	for i=1,5 do
+		local img = aliens[math.random(#aliens)]
+		local ghost = Sprite(img, 0, 0, -TURN/4, 0.45, 0.5)
+		table.insert(ghosts, ghost)
+	end
+
+	playerTrail = Trail(10, 550)
 
 	blocks = TileMap(images.blocks, 256, 32, {
 		'sand', 'soil', 'grass',
@@ -108,6 +119,8 @@ function love.update(dt)
 
 	collidePlayer(player, blocks)
 
+	playerTrail:add(player.x, player.y)
+
 	camera:follow(player.x, player.y, dt, 0.4, 0.95)
 end
 
@@ -141,6 +154,15 @@ function love.draw()
 	blocks:draw()
 	
 	love.graphics.setColor(1, 1, 1)
+	local len = playerTrail:length()
+	for i=#ghosts,1,-1 do
+		local d = 100 * i
+		if d <= len then
+			local ghost = ghosts[i]
+			ghost.x, ghost.y, ghost.th = playerTrail:at(d)
+			ghost:draw()
+		end
+	end
 	player:draw()
 end
 

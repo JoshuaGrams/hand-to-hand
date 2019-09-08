@@ -3,3 +3,5 @@
 * 2019-09-06 - 1.6 hours - geometry calculations.
 * 2019-09-07 - 0.8 hours - debug geometry, implement collision.
 * 2019-09-07 - 0.1 hours - fullscreen toggle, zoom initial camera.
+* 2019-09-07 - 0.3 hours - figure out gameplay details.
+* 2019-09-07 - 0.9 hours - implement player chain.
