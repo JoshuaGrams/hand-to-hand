@@ -6,6 +6,10 @@ local function ceilTo(x, unit)
 	return math.ceil(x/unit) * unit
 end
 
+local function clamp(x, lo, hi)
+	return math.max(lo, math.min(x, hi))
+end
+
 local function floorTo(x, unit)
 	return math.floor(x/unit) * unit
 end
@@ -40,6 +44,7 @@ end
 return {
 	boolToNum = boolToNum,
 	ceilTo = ceilTo,
+	clamp = clamp,
 	floorTo = floorTo,
 	limitLength = limitLength,
 	mergeAxes = mergeAxes,

@@ -46,12 +46,12 @@ function love.load()
 	player.omDecay = 0.8
 	player.alMax = player.omMax / 0.2
 
-	ghosts = {}
+	segments = {}
 	local aliens = {images.alien.blue, images.alien.green, images.alien.pink}
 	for i=1,5 do
 		local img = aliens[math.random(#aliens)]
-		local ghost = Sprite(img, 0, 0, -TURN/4, 0.45, 0.5)
-		table.insert(ghosts, ghost)
+		local segment = Sprite(img, 0, 0, -TURN/4, 0.45, 0.5)
+		table.insert(segments, segment)
 	end
 
 	playerTrail = Trail(10, 550)
@@ -120,6 +120,17 @@ function love.update(dt)
 	collidePlayer(player, blocks)
 
 	playerTrail:add(player.x, player.y)
+	local k = 1 - U.smoothOver(dt, 0.5)
+	local dthMax = player.omMax
+	for i=#segments,1,-1 do
+		local d = 100 * i
+		local seg = segments[i]
+		local th
+		seg.x, seg.y, th = playerTrail:at(d)
+		local dth = k * U.wrapAngle(th - seg.th)
+		dth = U.clamp(dth, -dthMax, dthMax)
+		seg.th = seg.th + dth
+	end
 
 	camera:follow(player.x, player.y, dt, 0.4, 0.95)
 end
@@ -154,13 +165,8 @@ function love.draw()
 	blocks:draw()
 	
 	love.graphics.setColor(1, 1, 1)
-	local len = playerTrail:length()
-	for i=#ghosts,1,-1 do
-		local d = 100 * i
-		local ghost = ghosts[i]
-		ghost.x, ghost.y, ghost.th = playerTrail:at(d)
-		ghost:draw()
-	end
+	for i=#segments,1,-1 do segments[i]:draw() end
+
 	player:draw()
 end
 
