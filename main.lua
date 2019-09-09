@@ -1,12 +1,8 @@
 local Camera = require 'camera'
-local G = require 'geometry'
 local kb = require 'scancode'
 local Level = require 'level'
-local Shard = require 'shard'
-local Sprite = require 'sprite'
+local Player = require 'player'
 local TileMap = require 'tilemap'
-local Trail = require 'trail'
-local U = require 'util'
 
 TURN = 2*math.pi
 
@@ -34,30 +30,10 @@ function love.load()
 
 	camera = Camera.new(0, 0, 1.8*w*h)
 
-	player = Sprite(image.alien.blue, 0, 0, -TURN/4, 0.45, 0.5)
-	player.r = 35  -- collision radius
-	player.dx, player.dy = 0, 0  -- linear velocity
-	player.vMax = 500
-	player.vMin = 1
-	player.vDecay = 5
-	player.aMax = player.vMax / 0.6
-	player.om = 0  -- angular velocity (omega)
-	player.omMax = 0.9 * TURN
-	player.omMin = 0.01 * TURN
-	player.omDecay = 0.8
-	player.alMax = player.omMax / 0.2
-
-	segments = {}
-	shards = {}
 	local aliens = {image.alien.blue, image.alien.green, image.alien.pink}
-	for i=1,5 do
-		local img = aliens[math.random(#aliens)]
-		local segment = Sprite(img, 0, 0, -TURN/4, 0.45, 0.5)
-		table.insert(segments, segment)
-		table.insert(shards, Shard(segment, math.random() < 0.5))
-	end
-
-	playerTrail = Trail(10, 550)
+	player = Player(0, 0, -TURN/4, aliens, image.shard)
+	for i=1,5 do player:addSegment(0, 0, -TURN/4) end
+	-- table.insert(shards, Shard(segment, math.random() < 0.5))
 
 	blocks = TileMap(image.blocks, 256, 32, {
 		'sand', 'soil', 'grass',
@@ -75,76 +51,13 @@ function love.load()
 	level1:generate(blocks)
 end
 
-local function collidePlayer(p, map)
-	local e = 0.6  -- elasticity (0 to 1)
-	local collisions = map:circleOverlaps(p.x, p.y, p.r)
-	for _,c in ipairs(collisions) do
-		local nx, ny, ov = unpack(c)
-		player.x = player.x + nx * ov
-		player.y = player.y + ny * ov
-
-		local away = player.dx * nx + player.dy * ny
-		if away < 0 then
-			player.dx = player.dx - (1+e) * away * nx
-			player.dy = player.dy - (1+e) * away * ny
-		end
-	end
-end
-
-local function turnPlayer(player, control, dt)
-	local om = player.om + control * player.alMax * dt
-	local om0, om1 = math.abs(player.om), math.abs(om)
-	if om1 <= player.omMax or om1 < om0 then player.om = om end
-	player.om = player.om * U.smoothOver(dt, player.omDecay)
-	if math.abs(player.om) < player.omMin then player.om = 0 end
-	player.th = U.wrapAngle(player.th + player.om * dt)
-end
-
-local function acceleratePlayer(player, control, dt)
-	local fx, fy = math.cos(player.th), math.sin(player.th)
-	if control < 0 then control = 0.3 * control end
-	local dv = control * player.aMax * dt
-	local dx, dy = player.dx + dv * fx, player.dy + dv * fy
-
-	-- Limit max speed.
-	local v0 = player.dx*player.dx + player.dy*player.dy
-	local v1 = dx*dx + dy*dy
-	if v1 < player.vMax * player.vMax or v1 < v0 then
-		player.dx, player.dy = dx, dy
-	end
-
-	-- Speed decays over time.
-	local decay = U.smoothOver(dt, player.vDecay)
-	player.dx, player.dy = player.dx * decay, player.dy * decay
-
-	-- Stop drifting when speed is less than vMin.
-	if player.dx*player.dx + player.dy*player.dy < player.vMin*player.vMin then
-		player.dx, player.dy = 0, 0
-	end
-end
 
 function love.update(dt)
-	local cx, cy = kb.stick('right', 'left', 'up', 'down')
-	turnPlayer(player, cx, dt)
-	acceleratePlayer(player, cy, dt)
+	local turn, accel = kb.stick('right', 'left', 'up', 'down')
+	player:update(dt, turn, accel, blocks)
 
-	player.x = player.x + player.dx * dt
-	player.y = player.y + player.dy * dt
-	collidePlayer(player, blocks)
-
-	playerTrail:add(player.x, player.y)
-	local k = 1 - U.smoothOver(dt, 0.5)
-	local dthMax = player.omMax
-	for i=#segments,1,-1 do
-		local th
-		local seg = segments[i]
-		seg.x, seg.y, th = playerTrail:at(100 * i)
-		local dth = k * U.wrapAngle(th - seg.th)
-		dth = U.clamp(dth, -dthMax, dthMax)
-		seg.th = seg.th + dth
-	end
-
-	camera:follow(player.x, player.y, dt, 0.4, 0.95)
+	local head = player:head()
+	camera:follow(head.x, head.y, dt, 0.4, 0.95)
 end
 
 local function drawStars()
@@ -177,13 +90,7 @@ function love.draw()
 	blocks:draw()
 	
 	love.graphics.setColor(1, 1, 1)
-	for i=#segments,1,-1 do segments[i]:draw() end
-
 	player:draw()
-
-	for _,shard in ipairs(shards) do
-		shard:draw()
-	end
 end
 
 local function toggleFullscreen()
