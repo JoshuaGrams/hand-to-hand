@@ -4,6 +4,7 @@
 
 6.0 hours Friday 2019-09-06
 
+
 * 2019-09-07 - 0.8 hours - debug geometry, implement collision.
 * 2019-09-07 - 0.1 hours - fullscreen toggle, zoom initial camera.
 * 2019-09-07 - 0.3 hours - figure out gameplay details.
@@ -11,4 +12,11 @@
 
 2.1 hours Saturday 2019-09-07
 
+
 * 2019-09-08 - 0.5 hours - improve player chain.
+* 2019-09-08 - 1.4 hours - start shards, fix level generation bug.
+
+1.9 hours Sunday 2019-09-08
+
+
+10.0 hours total

@@ -2,6 +2,7 @@ local Camera = require 'camera'
 local G = require 'geometry'
 local kb = require 'scancode'
 local Level = require 'level'
+local Shard = require 'shard'
 local Sprite = require 'sprite'
 local TileMap = require 'tilemap'
 local Trail = require 'trail'
@@ -47,11 +48,13 @@ function love.load()
 	player.alMax = player.omMax / 0.2
 
 	segments = {}
+	shards = {}
 	local aliens = {images.alien.blue, images.alien.green, images.alien.pink}
 	for i=1,5 do
 		local img = aliens[math.random(#aliens)]
 		local segment = Sprite(img, 0, 0, -TURN/4, 0.45, 0.5)
 		table.insert(segments, segment)
+		table.insert(shards, Shard(segment, math.random() < 0.5))
 	end
 
 	playerTrail = Trail(10, 550)
@@ -88,45 +91,54 @@ local function collidePlayer(p, map)
 	end
 end
 
-function love.update(dt)
-	local cx, cy = kb.stick('right', 'left', 'up', 'down')
-
-	-- Turning
-	local om = player.om + cx * player.alMax * dt
+local function turnPlayer(player, control, dt)
+	local om = player.om + control * player.alMax * dt
 	local om0, om1 = math.abs(player.om), math.abs(om)
 	if om1 <= player.omMax or om1 < om0 then player.om = om end
 	player.om = player.om * U.smoothOver(dt, player.omDecay)
 	if math.abs(player.om) < player.omMin then player.om = 0 end
 	player.th = U.wrapAngle(player.th + player.om * dt)
+end
 
+local function acceleratePlayer(player, control, dt)
 	local fx, fy = math.cos(player.th), math.sin(player.th)
-	if cy < 0 then cy = 0.3 * cy end
-	local dv = cy * player.aMax * dt
-	local dx = player.dx + dv * fx
-	local dy = player.dy + dv * fy
-	local v0 = player.dx*player.dx + player.dy * player.dy
+	if control < 0 then control = 0.3 * control end
+	local dv = control * player.aMax * dt
+	local dx, dy = player.dx + dv * fx, player.dy + dv * fy
+
+	-- Limit max speed.
+	local v0 = player.dx*player.dx + player.dy*player.dy
 	local v1 = dx*dx + dy*dy
-	if v1 < player.vMax * player.vMax or v1 < 0 then
+	if v1 < player.vMax * player.vMax or v1 < v0 then
 		player.dx, player.dy = dx, dy
 	end
+
+	-- Speed decays over time.
 	local decay = U.smoothOver(dt, player.vDecay)
 	player.dx, player.dy = player.dx * decay, player.dy * decay
-	if player.dx * player.dx + player.dy * player.dy < player.vMin * player.vMin then
+
+	-- Stop drifting when speed is less than vMin.
+	if player.dx*player.dx + player.dy*player.dy < player.vMin*player.vMin then
 		player.dx, player.dy = 0, 0
 	end
+end
+
+function love.update(dt)
+	local cx, cy = kb.stick('right', 'left', 'up', 'down')
+	turnPlayer(player, cx, dt)
+	acceleratePlayer(player, cy, dt)
+
 	player.x = player.x + player.dx * dt
 	player.y = player.y + player.dy * dt
-
 	collidePlayer(player, blocks)
 
 	playerTrail:add(player.x, player.y)
 	local k = 1 - U.smoothOver(dt, 0.5)
 	local dthMax = player.omMax
 	for i=#segments,1,-1 do
-		local d = 100 * i
-		local seg = segments[i]
 		local th
-		seg.x, seg.y, th = playerTrail:at(d)
+		local seg = segments[i]
+		seg.x, seg.y, th = playerTrail:at(100 * i)
 		local dth = k * U.wrapAngle(th - seg.th)
 		dth = U.clamp(dth, -dthMax, dthMax)
 		seg.th = seg.th + dth
@@ -168,6 +180,10 @@ function love.draw()
 	for i=#segments,1,-1 do segments[i]:draw() end
 
 	player:draw()
+
+	for _,shard in ipairs(shards) do
+		shard:draw()
+	end
 end
 
 local function toggleFullscreen()

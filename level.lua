@@ -92,14 +92,16 @@ local function exitRandomly(walker)
 end
 
 local function stepWalkers(self)
-	for _,w in ipairs(self.walkers) do
-		addRandomRoom(self, w)
-		exitRandomly(w)
+	local branch = false
+	if math.random() < self.branchChancePerStep then
+		branch = self.walkers[math.random(#self.walkers)]
 	end
 
-	if math.random() < self.branchChancePerStep then
-		local w = Walker(self.walkers[math.random(#self.walkers)])
-		table.insert(self.walkers, w)
+	for _,w in ipairs(self.walkers) do
+		addRandomRoom(self, w)
+		if w == branch then
+			table.insert(self.walkers, Walker(w))
+		end
 		exitRandomly(w)
 	end
 end
