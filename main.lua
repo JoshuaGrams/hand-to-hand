@@ -11,7 +11,7 @@ local U = require 'util'
 TURN = 2*math.pi
 
 function love.load()
-	images = {
+	image = {
 		blocks = love.graphics.newImage('img/blocks.png'),
 		star = love.graphics.newImage('img/star.png'),
 		shard = love.graphics.newImage('img/shard.png'),
@@ -34,7 +34,7 @@ function love.load()
 
 	camera = Camera.new(0, 0, 1.8*w*h)
 
-	player = Sprite(images.alien.blue, 0, 0, -TURN/4, 0.45, 0.5)
+	player = Sprite(image.alien.blue, 0, 0, -TURN/4, 0.45, 0.5)
 	player.r = 35  -- collision radius
 	player.dx, player.dy = 0, 0  -- linear velocity
 	player.vMax = 500
@@ -49,7 +49,7 @@ function love.load()
 
 	segments = {}
 	shards = {}
-	local aliens = {images.alien.blue, images.alien.green, images.alien.pink}
+	local aliens = {image.alien.blue, image.alien.green, image.alien.pink}
 	for i=1,5 do
 		local img = aliens[math.random(#aliens)]
 		local segment = Sprite(img, 0, 0, -TURN/4, 0.45, 0.5)
@@ -59,7 +59,7 @@ function love.load()
 
 	playerTrail = Trail(10, 550)
 
-	blocks = TileMap(images.blocks, 256, 32, {
+	blocks = TileMap(image.blocks, 256, 32, {
 		'sand', 'soil', 'grass',
 		'ice', 'purple', 'zigzag'
 	})
@@ -148,7 +148,7 @@ function love.update(dt)
 end
 
 local function drawStars()
-	local img = images.star
+	local img = image.star
 	local iw, ih = img:getDimensions()
 	local ox, oy = 0.5 * iw, 0.5 * ih
 	local b = camera.bounds
@@ -161,7 +161,7 @@ local function drawStars()
 			local dy = 0.8 * love.math.noise(nx - 0.3*noiseUnit, ny + 0.1*noiseUnit)
 			local th = (2*dx - 1) * TURN/10
 			local sc = 0.5 + math.abs(dy)
-			love.graphics.draw(images.star, (x+dx)*unit, (y+dy)*unit, th, sc, sc, ox, oy)
+			love.graphics.draw(image.star, (x+dx)*unit, (y+dy)*unit, th, sc, sc, ox, oy)
 		end
 	end
 end

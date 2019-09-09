@@ -16,7 +16,7 @@ function Shard.set(self, alien, right)
 	self.alien, self.right = alien, right
 	local x, y = position(self)
 	local th = math.random() * 2*math.pi
-	Sprite.set(self, images.shard, x, y, th)
+	Sprite.set(self, image.shard, x, y, th)
 end
 
 function Shard.draw(self)
