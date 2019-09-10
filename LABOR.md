@@ -18,7 +18,12 @@
 
 1.9 hours Sunday 2019-09-08
 
-10.0 hours total
-
 
 * 2019-09-09 - 0.7 hours - start moving code to a player object.
+
+0.7 hours Monday 2019-09-09
+
+10.7 hours total
+
+
+* 2019-09-10 - 1.1 hours - crystal shard generation.

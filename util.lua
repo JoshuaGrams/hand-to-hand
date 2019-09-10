@@ -14,6 +14,10 @@ local function floorTo(x, unit)
 	return math.floor(x/unit) * unit
 end
 
+local function lerp(t, a, b)
+	return a + t * (b - a)
+end
+
 local function limitLength(x, y, l)
 	l = l or 1
 	local d2, l2 = x*x + y*y, l*l
@@ -46,6 +50,7 @@ return {
 	ceilTo = ceilTo,
 	clamp = clamp,
 	floorTo = floorTo,
+	lerp = lerp,
 	limitLength = limitLength,
 	mergeAxes = mergeAxes,
 	roundTo = roundTo,

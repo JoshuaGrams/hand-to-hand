@@ -7,6 +7,7 @@ local TileMap = require 'tilemap'
 TURN = 2*math.pi
 
 function love.load()
+	math.randomseed(1)
 	image = {
 		blocks = love.graphics.newImage('img/blocks.png'),
 		star = love.graphics.newImage('img/star.png'),
@@ -33,7 +34,6 @@ function love.load()
 	local aliens = {image.alien.blue, image.alien.green, image.alien.pink}
 	player = Player(0, 0, -TURN/4, aliens, image.shard)
 	for i=1,5 do player:addSegment(0, 0, -TURN/4) end
-	-- table.insert(shards, Shard(segment, math.random() < 0.5))
 
 	blocks = TileMap(image.blocks, 256, 32, {
 		'sand', 'soil', 'grass',

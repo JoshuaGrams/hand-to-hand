@@ -1,5 +1,5 @@
 local Object = require 'base-class'
-local Sprite = require 'sprite'
+local Segment = require 'segment'
 local Trail = require 'trail'
 local U = require 'util'
 
@@ -34,8 +34,8 @@ function Player.addSegment(self, x, y, radians)
 		error("You may only have " .. self.maxSegments .. " aliens in your chain.")
 	end
 	local img = self.segmentImages[math.random(#self.segmentImages)]
-	local sprite = Sprite(img, x, y, radians, 0.45, 0.5)
-	table.insert(self.segments, sprite)
+	local seg = Segment(img, x, y, radians, self.shardImage)
+	table.insert(self.segments, seg)
 end
 
 local function turnHead(self, control, dt)
@@ -72,46 +72,45 @@ local function accelerateHead(self, control, dt)
 	end
 end
 
-local function bounceHead(self, map)
-	local head = self.segments[1]
+local function bounceHead(head, player, map)
 	local e = 0.6  -- elasticity (0 to 1)
-	local collisions = map:circleOverlaps(head.x, head.y, self.r)
+	local collisions = map:circleOverlaps(head.x, head.y, player.r)
 	for _,c in ipairs(collisions) do
 		local nx, ny, ov = unpack(c)
 		head.x = head.x + nx * ov
 		head.y = head.y + ny * ov
 
-		local away = self.vx * nx + self.vy * ny
+		local away = player.vx * nx + player.vy * ny
 		if away < 0 then
-			self.vx = self.vx - (1+e) * away * nx
-			self.vy = self.vy - (1+e) * away * ny
+			player.vx = player.vx - (1+e) * away * nx
+			player.vy = player.vy - (1+e) * away * ny
 		end
 	end
 end
 
-local function updateOtherSegments(self, dt)
-	local k = 1 - U.smoothOver(dt, 0.5)
-	for i=2,#self.segments do
-		local th
-		local seg = self.segments[i]
-		seg.x, seg.y, th = self.trail:at(100*(i-1))
-		-- Interpolate angle toward trail direction.
-		local dth = k * U.wrapAngle(th - seg.th)
-		dth = U.clamp(dth, -self.omMax, self.omMax) -- but limit max speed
-		seg.th = seg.th + dth
-	end
+local function turnTowards(seg, th, k, omMax)
+	local dth = k * U.wrapAngle(th - seg.th)
+	dth = U.clamp(dth, -omMax, omMax) -- but limit max speed
+	seg.th = seg.th + dth
 end
 
 function Player.update(self, dt, turn, accel, map)
 	turnHead(self, turn, dt)
 	accelerateHead(self, accel, dt)
 
-	local head = self.segments[1]
-	head.x, head.y = head.x + self.vx * dt, head.y + self.vy * dt
-	bounceHead(self, map)
-	
-	self.trail:add(head.x, head.y)
-	updateOtherSegments(self, dt)
+	local k = 1 - U.smoothOver(dt, 0.5)
+	for s,seg in ipairs(self.segments) do
+		if s == 1 then  -- leader
+			seg.x, seg.y = seg.x + self.vx * dt, seg.y + self.vy * dt
+			bounceHead(seg, self, map)
+			self.trail:add(seg.x, seg.y)
+		else  -- follower
+			local x, y, th = self.trail:at(100 * (s-1))
+			seg.x, seg.y = x, y
+			turnTowards(seg, th, k, self.omMax)
+		end
+		seg:update(dt, self.segments[s-1])
+	end
 end
 
 function Player.head(self)
