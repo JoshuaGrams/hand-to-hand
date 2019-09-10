@@ -1,10 +1,18 @@
 local Camera = require 'camera'
+local Enemy = require 'enemy'
 local kb = require 'scancode'
 local Level = require 'level'
 local Player = require 'player'
 local TileMap = require 'tilemap'
 
 TURN = 2*math.pi
+
+local function quad(img, x, y, w, h, ox, oy)
+	ox, oy = ox or 0.5, oy or 0.5
+	local iw, ih = img:getDimensions()
+	local q = love.graphics.newQuad(x, y, w, h, iw, ih)
+	return { img = img, quad = q, ox = ox*w, oy = oy*h }
+end
 
 function love.load()
 	math.randomseed(1)
@@ -22,8 +30,28 @@ function love.load()
 			red = love.graphics.newImage('img/gem-red.png'),
 			blue = love.graphics.newImage('img/gem-blue.png'),
 			yellow = love.graphics.newImage('img/gem-yellow.png'),
-		}
+		},
+		enemies = love.graphics.newImage('img/enemies.png')
 	}
+
+	local img = image.enemies
+	frames = {
+		fly = {
+			quad(img, 0, 0, 148, 75, 0.41, 0.6),
+			quad(img, 148, 0,  154, 75,  0.4, 0.6)
+		},
+		fish = {
+			quad(img, 6, 77, 136, 85, 0.29, 0.62),
+			quad(img, 162, 75, 127, 87, 0.305, 0.595)
+		},
+		block = {quad(img, 21, 162, 106, 106)}
+	}
+
+	enemies = {}
+	local fish = Enemy(frames.fish, 100, 100, 0, 1, 1/5)
+	local fly = Enemy(frames.fly, -100, 100, 0, 0.7, 1/30)
+	table.insert(enemies, fish)
+	table.insert(enemies, fly)
 
 	local w, h = love.graphics.getDimensions()
 	unit = math.min(w, h) / 3.5
@@ -35,7 +63,7 @@ function love.load()
 
 	local aliens = {image.alien.blue, image.alien.green, image.alien.pink}
 	player = Player(0, 0, -TURN/4, aliens, image.shard)
-	for i=1,5 do player:addSegment(0, 0, -TURN/4) end
+	for i=1,2 do player:addSegment(0, 0, -TURN/4) end
 
 	blocks = TileMap(image.blocks, 256, 32, {
 		'sand', 'soil', 'grass',
@@ -75,6 +103,10 @@ function love.update(dt)
 	for _,i in ipairs(delete) do
 		table.remove(shards, i)
 	end
+
+	for _,e in ipairs(enemies) do
+		e:update(dt)
+	end
 end
 
 local function drawStars()
@@ -105,6 +137,10 @@ function love.draw()
 	love.graphics.setColor(1, 1, 1)
 
 	blocks:draw()
+
+	for _,enemy in ipairs(enemies) do
+		enemy:draw()
+	end
 	
 	player:draw()
 

@@ -76,6 +76,10 @@ function Segment.update(self, dt, ahead)
 			table.insert(self.shards, shard)
 		end
 	end
+
+	if #self.shards == 2 and (not ahead or #ahead.shards == 2) then
+		self.handTimer = self.handDelay
+	end
 end
 
 function Segment.draw(self)
