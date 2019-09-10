@@ -28,3 +28,4 @@
 
 * 2019-09-10 - 1.1 hours - crystal shard generation.
 * 2019-09-10 - 0.4 hours - throw shards.
+* 2019-09-10 - 0.1 hours - shards collide with map.

@@ -65,12 +65,15 @@ function love.update(dt)
 	local head = player:head()
 	camera:follow(head.x, head.y, dt, 0.4, 0.95)
 
-	while #shards > 10 do
-		table.remove(shards, 1)
-	end
-
-	for _,shard in ipairs(shards) do
+	local delete = {}
+	for i,shard in ipairs(shards) do
 		shard:update(dt)
+		if #blocks:circleOverlaps(shard.x, shard.y, 7) > 0 then
+			table.insert(delete, i)
+		end
+	end
+	for _,i in ipairs(delete) do
+		table.remove(shards, i)
 	end
 end
 

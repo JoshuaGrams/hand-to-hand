@@ -33,6 +33,10 @@ local function mergeAxes(...)
 	return pos + neg
 end
 
+local function randomIn(lo, hi)
+	return lo + (hi - lo) * math.random()
+end
+
 local function roundTo(x, unit)
 	return math.floor(0.5 + x/unit) * unit
 end
@@ -53,6 +57,7 @@ return {
 	lerp = lerp,
 	limitLength = limitLength,
 	mergeAxes = mergeAxes,
+	randomIn = randomIn,
 	roundTo = roundTo,
 	smoothOver = smoothOver,
 	wrapAngle = wrapAngle
