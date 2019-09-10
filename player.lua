@@ -27,6 +27,9 @@ function Player.set(self, x, y, radians, segmentImages, shardImage)
 	self.omMin, self.omMax = 0.01 * TURN, 0.9 * TURN  -- radians per second
 	self.alMax = self.omMax / 0.2  -- zero to full speed in x seconds
 	self.omDecay = 0.8  -- seconds to reduce rotation by 95%
+
+	self.shardSpeed = 700
+	self.fireDelay = 0.2
 end
 
 function Player.addSegment(self, x, y, radians)
@@ -94,9 +97,9 @@ local function turnTowards(seg, th, k, omMax)
 	seg.th = seg.th + dth
 end
 
-function Player.update(self, dt, turn, accel, map)
-	turnHead(self, turn, dt)
-	accelerateHead(self, accel, dt)
+function Player.update(self, dt, control, map)
+	turnHead(self, control.turn, dt)
+	accelerateHead(self, control.accel, dt)
 
 	local k = 1 - U.smoothOver(dt, 0.5)
 	for s,seg in ipairs(self.segments) do
@@ -110,6 +113,25 @@ function Player.update(self, dt, turn, accel, map)
 			turnTowards(seg, th, k, self.omMax)
 		end
 		seg:update(dt, self.segments[s-1])
+	end
+
+	if self.fireTimer then
+		self.fireTimer = self.fireTimer - dt
+		if self.fireTimer <= 0 then
+			self.fireTimer = nil
+		end
+	end
+	if control.fire and not self.fireTimer then
+		local head = self.segments[1]
+		local shard = head:shard()
+		if shard then
+			local fx, fy = math.cos(head.th), math.sin(head.th)
+			shard.vx = self.vx + self.shardSpeed * fx
+			shard.vy = self.vy + self.shardSpeed * fy
+			shard.om = math.random() * 5*math.pi
+			table.insert(shards, shard)
+			self.fireTimer = self.fireDelay
+		end
 	end
 end
 

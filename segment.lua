@@ -8,8 +8,8 @@ function Segment.set(self, img, x, y, radians, shardImg)
 	self.shardImg = shardImg
 	self.shards = {}
 	self.rightHanded = math.random() < 0.7
-	self.handDelay = 0.6  -- seconds
-	self.generateEvery = 4  -- times handDelay.
+	self.handDelay = 0.3  -- seconds
+	self.generateEvery = math.ceil(1.9 / self.handDelay)
 	self.handTimer = self.handDelay * math.random() 
 	self.handTimes = math.random(self.generateEvery) - 1
 end
@@ -34,10 +34,19 @@ local function handPosition(self, dominant, shard)
 	return x, y
 end
 
+function Segment.shard(self)
+	for s,shard in ipairs(self.shards) do
+		if not shard.t then
+			table.remove(self.shards, s)
+			return shard
+		end
+	end
+end
+
 function Segment.update(self, dt, ahead)
 	for _,shard in ipairs(self.shards) do
 		if shard.t then
-			shard.t = shard.t + dt / 0.2
+			shard.t = shard.t + dt / (0.5 * self.handDelay)
 			if shard.t >= 1 then
 				shard.t, shard.x0, shard.y0 = nil
 			end
@@ -45,28 +54,27 @@ function Segment.update(self, dt, ahead)
 	end
 
 	self.handTimer = self.handTimer - dt
-	if self.handTimer > 0 then return end
+	if self.handTimer <= 0 then
+		self.handTimer = self.handDelay
+		self.handTimes = self.handTimes + 1
 
-	-- Timer triggered.
-	self.handTimer = self.handDelay
-	self.handTimes = self.handTimes + 1
-
-	-- Pass shards up.
-	if #self.shards > 0 and ahead and #ahead.shards < 2 then
-		if not self.shards[#self.shards].t then
-			local shard = table.remove(self.shards)
-			shard.t, shard.x0, shard.y0 = 0, shard.x, shard.y
-			table.insert(ahead.shards, shard)
+		-- Pass shards up.
+		if ahead and #ahead.shards < 2 then
+			local shard = self:shard()
+			if shard then
+				shard.t, shard.x0, shard.y0 = 0, shard.x, shard.y
+				table.insert(ahead.shards, shard)
+			end
 		end
-	end
 
-	-- Generate a new shard.
-	if self.handTimes >= self.generateEvery and #self.shards < 2 then
-		self.handTimes = 0
-		local x, y = handPosition(self, #self.shards == 0)
-		local th = math.random() * 2*math.pi
-		local shard = Sprite(self.shardImg, x, y, th)
-		table.insert(self.shards, shard)
+		-- Generate a new shard.
+		if self.handTimes >= self.generateEvery and #self.shards < 2 then
+			self.handTimes = 0
+			local x, y = handPosition(self, #self.shards == 0)
+			local th = math.random() * 2*math.pi
+			local shard = Sprite(self.shardImg, x, y, th)
+			table.insert(self.shards, shard)
+		end
 	end
 end
 

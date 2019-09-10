@@ -17,4 +17,10 @@ function Sprite.draw(self)
 	love.graphics.draw(self.img, x, y, th, sc, sc, ox, oy)
 end
 
+function Sprite.update(self, dt)
+	self.x = self.x + self.vx * dt
+	self.y = self.y + self.vy * dt
+	self.th = self.th + self.om * dt
+end
+
 return Sprite

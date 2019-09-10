@@ -31,6 +31,8 @@ function love.load()
 
 	camera = Camera.new(0, 0, 1.8*w*h)
 
+	shards = {}
+
 	local aliens = {image.alien.blue, image.alien.green, image.alien.pink}
 	player = Player(0, 0, -TURN/4, aliens, image.shard)
 	for i=1,5 do player:addSegment(0, 0, -TURN/4) end
@@ -54,10 +56,22 @@ end
 
 function love.update(dt)
 	local turn, accel = kb.stick('right', 'left', 'up', 'down')
-	player:update(dt, turn, accel, blocks)
+	local control = {
+		turn = turn, accel = accel,
+		fire = love.keyboard.isScancodeDown('space')
+	}
+	player:update(dt, control, blocks)
 
 	local head = player:head()
 	camera:follow(head.x, head.y, dt, 0.4, 0.95)
+
+	while #shards > 10 do
+		table.remove(shards, 1)
+	end
+
+	for _,shard in ipairs(shards) do
+		shard:update(dt)
+	end
 end
 
 local function drawStars()
@@ -85,12 +99,15 @@ function love.draw()
 
 	love.graphics.setColor(0.3, 0.3, 0.3)
 	drawStars()
-
 	love.graphics.setColor(1, 1, 1)
+
 	blocks:draw()
 	
-	love.graphics.setColor(1, 1, 1)
 	player:draw()
+
+	for _,shard in ipairs(shards) do
+		shard:draw()
+	end
 end
 
 local function toggleFullscreen()
@@ -102,7 +119,7 @@ function love.keypressed(k, s)
 	local alt = love.keyboard.isDown('lalt', 'ralt')
 	if k == 'escape' then
 		love.event.quit()
-	elseif k == 'space' then
+	elseif k == 'tab' then
 		level1:generate(blocks)
 	elseif k == 'f11' or (alt and k == 'return') then
 		toggleFullscreen()
