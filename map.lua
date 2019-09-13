@@ -119,6 +119,12 @@ function generateWalls(self, tilemap)
 	end)
 end
 
+local function randomFloor(wallTilemap)
+	if wallTilemap.floors then
+		return unpack(wallTilemap.floors[math.random(#wallTilemap.floors)])
+	end
+end
+
 function Map.generate(self, wallTilemap)
 	self.walkers = {Walker(self, 0, 0, 0)}
 	self.floor = Grid(wallTilemap.unit)
@@ -128,6 +134,14 @@ function Map.generate(self, wallTilemap)
 		stepWalkers(self)
 	end
 	generateWalls(self, wallTilemap)
+
+	local tiles = {}
+	self.floor:foreach(function(_, col, row)
+		local x, y = self.floor:toPixel(col, row)
+		table.insert(tiles, {x, y})
+	end)
+	wallTilemap.floors = tiles
+	wallTilemap.randomFloor = randomFloor
 
 	self.walkers = nil
 	self.floor = nil

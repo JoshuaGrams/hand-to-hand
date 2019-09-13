@@ -35,3 +35,4 @@
 
 
 * 2019-09-13 - 0.6 hours - music.
+* 2019-09-13 - 1.2 hours - enemy fly.

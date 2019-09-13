@@ -1,3 +1,4 @@
+local G = require 'geometry'
 local Object = require 'base-class'
 local Segment = require 'segment'
 local Trail = require 'trail'
@@ -78,17 +79,7 @@ end
 local function bounceHead(head, player, map)
 	local e = 0.6  -- elasticity (0 to 1)
 	local collisions = map:circleOverlaps(head.x, head.y, player.r)
-	for _,c in ipairs(collisions) do
-		local nx, ny, ov = unpack(c)
-		head.x = head.x + nx * ov
-		head.y = head.y + ny * ov
-
-		local away = player.vx * nx + player.vy * ny
-		if away < 0 then
-			player.vx = player.vx - (1+e) * away * nx
-			player.vy = player.vy - (1+e) * away * ny
-		end
-	end
+	G.bounceAlong(head, collisions, 0.6, player)
 end
 
 local function turnTowards(seg, th, k, omMax)

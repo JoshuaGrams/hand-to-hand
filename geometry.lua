@@ -1,9 +1,26 @@
 local abs, sqrt = math.abs, math.sqrt
 local function sign(x)  return x < 0 and -1 or 1  end
 
+local function bounceAlong(obj, collisions, e, vel)
+	vel = vel or obj
+	for _,c in ipairs(collisions) do
+		local nx, ny, ov = unpack(c)
+		obj.x = obj.x + nx * ov
+		obj.y = obj.y + ny * ov
+
+		if vel.vx and vel.vy then
+			local away = vel.vx * nx + vel.vy * ny
+			if away < 0 then
+				vel.vx = vel.vx - (1+e) * away * nx
+				vel.vy = vel.vy - (1+e) * away * ny
+			end
+		end
+	end
+end
+
 -- dx and dy are circle center minus square center.
 -- r is circle radius, s is length of square side.
-function circleOverlapsSquare(dx, dy, r, s)
+local function circleOverlapsSquare(dx, dy, r, s)
 	s = s / 2
 	local S = r + s
 	local adx, ady = abs(dx), abs(dy)
@@ -26,5 +43,6 @@ function circleOverlapsSquare(dx, dy, r, s)
 end
 
 return {
+	bounceAlong = bounceAlong,
 	circleOverlapsSquare = circleOverlapsSquare
 }

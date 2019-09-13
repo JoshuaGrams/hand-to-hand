@@ -1,5 +1,6 @@
 local Camera = require 'camera'
 local Enemy = require 'enemy'
+local Fly = require 'enemy-fly'
 local kb = require 'scancode'
 local Music = require 'music'
 local Player = require 'player'
@@ -58,12 +59,6 @@ function love.load()
 		block = {quad(img, 21, 162, 106, 106)}
 	}
 
-	enemies = {}
-	local fish = Enemy(frames.fish, 100, 100, 0, 1, 1/5)
-	local fly = Enemy(frames.fly, -100, 100, 0, 0.7, 1/30)
-	table.insert(enemies, fish)
-	table.insert(enemies, fly)
-
 	local w, h = love.graphics.getDimensions()
 	unit = math.min(w, h) / 3.5
 	noiseUnit = 43/17
@@ -85,6 +80,12 @@ function love.load()
 		require 'levels/1'
 	}
 	levels[1]:generate(blocks)
+
+	enemies = {}
+	local fish = Enemy(frames.fish, 100, 100, 0, 1, 1/5)
+	local fly = Fly(blocks:randomFloor())
+	table.insert(enemies, fish)
+	table.insert(enemies, fly)
 end
 
 
@@ -112,8 +113,8 @@ function love.update(dt)
 		table.remove(shards, i)
 	end
 
-	for _,e in ipairs(enemies) do
-		e:update(dt)
+	for _,enemy in ipairs(enemies) do
+		enemy:update(dt)
 	end
 end
 
@@ -167,7 +168,7 @@ function love.keypressed(k, s)
 	if k == 'escape' then
 		love.event.quit()
 	elseif k == 'tab' then
-		level1:generate(blocks)
+		levels[1]:generate(blocks)
 	elseif k == 'f11' or (alt and k == 'return') then
 		toggleFullscreen()
 	end
