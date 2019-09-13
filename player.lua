@@ -21,12 +21,12 @@ function Player.set(self, x, y, radians, segmentImages, shardImage)
 
 	self.vx, self.vy = 0, 0  -- linear velocity
 	self.vMin, self.vMax = 1, 500  -- pixels per second
-	self.aMax = self.vMax / 0.6  -- zero to full speed in x seconds
+	self.aMax = self.vMax / 0.55  -- zero to full speed in x seconds
 	self.vDecay = 5  -- seconds to reduce velocity by 95%
 
 	self.om = 0  -- angular velocity (omega)
-	self.omMin, self.omMax = 0.01 * TURN, 0.9 * TURN  -- radians per second
-	self.alMax = self.omMax / 0.15  -- zero to full speed in x seconds
+	self.omMin, self.omMax = 0.01 * TURN, 0.75 * TURN  -- radians per second
+	self.alMax = self.omMax / 0.3  -- zero to full speed in x seconds
 	self.omDecay = 0.5  -- seconds to reduce rotation by 95%
 
 	self.shardSpeed = 700
@@ -47,7 +47,9 @@ local function turnHead(self, control, dt)
 	local om = self.om + control * self.alMax * dt
 	local om0, om1 = math.abs(self.om), math.abs(om)
 	if om1 <= self.omMax or om1 < om0 then self.om = om end
-	self.om = self.om * U.smoothOver(dt, self.omDecay)
+	if math.abs(control) < 0.1 then
+		self.om = self.om * U.smoothOver(dt, self.omDecay)
+	end
 	if math.abs(self.om) < self.omMin then self.om = 0 end
 	head.th = U.wrapAngle(head.th + self.om * dt)
 end
@@ -67,8 +69,10 @@ local function accelerateHead(self, control, dt)
 	end
 
 	-- Speed decays over time.
-	local decay = U.smoothOver(dt, self.vDecay)
-	self.vx, self.vy = self.vx * decay, self.vy * decay
+	if math.abs(control) < 0.1 then
+		local decay = U.smoothOver(dt, self.vDecay)
+		self.vx, self.vy = self.vx * decay, self.vy * decay
+	end
 
 	-- Stop drifting when speed is less than vMin.
 	if self.vx*self.vx + self.vy*self.vy < self.vMin*self.vMin then
