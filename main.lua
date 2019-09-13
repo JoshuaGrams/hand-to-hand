@@ -1,7 +1,6 @@
 local Camera = require 'camera'
 local Enemy = require 'enemy'
 local kb = require 'scancode'
-local Level = require 'level'
 local Music = require 'music'
 local Player = require 'player'
 local TileMap = require 'tilemap'
@@ -15,8 +14,16 @@ local function quad(img, x, y, w, h, ox, oy)
 	return { img = img, quad = q, ox = ox*w, oy = oy*h }
 end
 
+function generateSeedFromClock(debug)
+	local seed = os.time() + math.floor(1000 * os.clock())
+	seed = seed * seed % 1000000
+	seed = seed * seed % 1000000
+	if debug then print('Seed:', seed) end
+	return seed
+end
+
 function love.load()
-	math.randomseed(1)
+	math.randomseed(generateSeedFromClock())
 
 	music = Music('audio/Arroz Con Pollo.mp3', 'audio/Cuban Sandwich.mp3')
 
@@ -74,15 +81,10 @@ function love.load()
 		'ice', 'purple', 'zigzag'
 	})
 
-	level1 = Level(200, 0.05, {4, 1, 0.5, 0}, {
-		{ {0,0}, chance = 5, exits = {{1,0}, {0,1}, {-1,0}, {0,-1}} },
-		{
-			{0,0}, {1, 0}, {0,1}, {1,1},
-			chance = 2,
-			exits = {{2,0}, {0,2}, {-1,0}, {0,-1}}
-		}
-	})
-	level1:generate(blocks)
+	levels = {
+		require 'levels/1'
+	}
+	levels[1]:generate(blocks)
 end
 
 

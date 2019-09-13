@@ -20,9 +20,9 @@ end
 
 ------------------------------------------------------------------------
 
-local Level = Object:extend()
+local Map = Object:extend()
 
-function Level.set(self, limit, branchChance, dirChances, rooms)
+function Map.set(self, limit, branchChance, dirChances, rooms)
 	self.limit = limit
 	self.branchChancePerStep = branchChance
 	self.dirChances = normalizedChances(dirChances)
@@ -119,7 +119,7 @@ function generateWalls(self, tilemap)
 	end)
 end
 
-function Level.generate(self, wallTilemap)
+function Map.generate(self, wallTilemap)
 	self.walkers = {Walker(self, 0, 0, 0)}
 	self.floor = Grid(wallTilemap.unit)
 	self.floorCount = 0
@@ -133,4 +133,4 @@ function Level.generate(self, wallTilemap)
 	self.floor = nil
 end
 
-return Level
+return Map
