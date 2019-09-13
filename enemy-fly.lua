@@ -16,6 +16,7 @@ end
 
 function Fly.set(self, x, y)
 	Enemy.set(self, frames.fly, x, y, 0, 0.7, 1/30)
+	self.r = 35
 	changeDirection(self)
 end
 
@@ -24,7 +25,7 @@ function Fly.ai(self, dt)
 	local fx, fy = math.cos(fwd), math.sin(fwd)
 	self.vx, self.vy = self.speed * fx, self.speed * fy
 
-	local c = blocks:circleOverlaps(self.x, self.y, 20)
+	local c = blocks:circleOverlaps(self.x, self.y, self.r)
 	if #c > 0 then
 		G.bounceAlong(self, c, 1)
 		self.th = U.wrapAngle(math.atan2(self.vy, self.vx) + math.pi)
@@ -34,6 +35,5 @@ function Fly.ai(self, dt)
 		if self.seconds <= 0 then changeDirection(self) end
 	end
 end
-
 
 return Fly

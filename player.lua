@@ -26,8 +26,8 @@ function Player.set(self, x, y, radians, segmentImages, shardImage)
 
 	self.om = 0  -- angular velocity (omega)
 	self.omMin, self.omMax = 0.01 * TURN, 0.9 * TURN  -- radians per second
-	self.alMax = self.omMax / 0.2  -- zero to full speed in x seconds
-	self.omDecay = 0.8  -- seconds to reduce rotation by 95%
+	self.alMax = self.omMax / 0.15  -- zero to full speed in x seconds
+	self.omDecay = 0.5  -- seconds to reduce rotation by 95%
 
 	self.shardSpeed = 700
 	self.fireDelay = 0.2

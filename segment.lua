@@ -73,6 +73,7 @@ function Segment.update(self, dt, ahead)
 			local x, y = handPosition(self, #self.shards == 0)
 			local th = math.random() * 2*math.pi
 			local shard = Sprite(self.shardImg, x, y, th)
+			shard.r = 15
 			table.insert(self.shards, shard)
 		end
 	end

@@ -105,16 +105,29 @@ function love.update(dt)
 	local delete = {}
 	for i,shard in ipairs(shards) do
 		shard:update(dt)
-		if #blocks:circleOverlaps(shard.x, shard.y, 7) > 0 then
+		if #blocks:circleOverlaps(shard.x, shard.y, shard.r) > 0 then
 			table.insert(delete, i)
+		end
+		for _,enemy in ipairs(enemies) do
+			local dx, dy = enemy.x - shard.x, enemy.y - shard.y
+			local r = enemy.r + shard.r
+			if dx*dx + dy*dy <= r*r then
+				enemy:hit(1)
+				table.insert(delete, i)
+			end
 		end
 	end
 	for _,i in ipairs(delete) do
 		table.remove(shards, i)
 	end
 
-	for _,enemy in ipairs(enemies) do
-		enemy:update(dt)
+	for i=#enemies,1,-1 do
+		local enemy = enemies[i]
+		if enemy.delete then
+			table.remove(enemies, i)
+		else
+			enemy:update(dt)
+		end
 	end
 end
 

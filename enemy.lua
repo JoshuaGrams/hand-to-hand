@@ -11,9 +11,22 @@ function Enemy.set(self, quads, x, y, radians, scale, frameDelay)
 	self.frame = 1
 	self.frameDelay = frameDelay or 0.1
 	self.frameTimer = self.frameDelay
+	self.health = 1
+	self.r = 0
+	self.deadTime = 1
 end
 
 function Enemy.update(self, dt)
+	if self.dead then
+		self.dead = self.dead - dt
+		if self.dead <= 0 then
+			self.delete = true
+		else
+			self.sc = math.max(0, self.sc - dt)
+			self.th = self.th + dt * 10*math.pi
+		end
+	end
+
 	if self.ai then self:ai(dt) end
 
 	if self.vx then
@@ -30,6 +43,11 @@ function Enemy.update(self, dt)
 		self.frame = self.frame + 1
 		if self.frame > #self.frames then self.frame = 1 end
 	end
+end
+
+function Enemy.hit(self, damage)
+	self.health = self.health - 1
+	if self.health <= 0 then self.dead = self.deadTime end
 end
 
 function Enemy.draw(self)
