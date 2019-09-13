@@ -23,10 +23,15 @@
 
 0.7 hours Monday 2019-09-09
 
-10.7 hours total
-
 
 * 2019-09-10 - 1.1 hours - crystal shard generation.
 * 2019-09-10 - 0.4 hours - throw shards.
 * 2019-09-10 - 0.1 hours - shards collide with map.
 * 2019-09-10 - 1.2 hours - enemy design and graphics/animation code.
+
+2.8 hours Tuesday 2019-09-10
+
+13.5 hours total
+
+
+* 2019-09-13 - 0.6 hours - music.

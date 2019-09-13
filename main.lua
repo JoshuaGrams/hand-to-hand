@@ -2,6 +2,7 @@ local Camera = require 'camera'
 local Enemy = require 'enemy'
 local kb = require 'scancode'
 local Level = require 'level'
+local Music = require 'music'
 local Player = require 'player'
 local TileMap = require 'tilemap'
 
@@ -16,6 +17,9 @@ end
 
 function love.load()
 	math.randomseed(1)
+
+	music = Music('audio/Arroz Con Pollo.mp3', 'audio/Cuban Sandwich.mp3')
+
 	image = {
 		blocks = love.graphics.newImage('img/blocks.png'),
 		star = love.graphics.newImage('img/star.png'),
@@ -83,6 +87,8 @@ end
 
 
 function love.update(dt)
+	music:update()
+
 	local turn, accel = kb.stick('right', 'left', 'up', 'down')
 	local control = {
 		turn = turn, accel = accel,
