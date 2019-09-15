@@ -1,5 +1,7 @@
 local Grid = require 'grid'
 local Object = require 'base-class'
+local Segment = require 'segment'
+local U = require 'util'
 
 local function randomChoice(chances)
 	local rnd, cur = math.random(), 0
@@ -22,14 +24,17 @@ end
 
 local Map = Object:extend()
 
-function Map.set(self, limit, branchChance, dirChances, rooms)
+function Map.set(self, limit, branchChance, dirChances, rooms, spawns)
 	self.limit = limit
-	self.branchChancePerStep = branchChance
-	self.dirChances = normalizedChances(dirChances)
-	self.rooms = rooms
+	self.branchChancePerStep = branchChance or 0
+	self.dirChances = normalizedChances(dirChances or {})
+	self.rooms = rooms or {}
 	local roomChances = {}
-	for i,r in ipairs(rooms) do roomChances[i] = r.chance end
+	for i,r in ipairs(self.rooms) do
+		roomChances[i] = r.chance
+	end
 	self.roomChances = normalizedChances(roomChances)
+	self.spawns = spawns or {}
 end
 
 local function Walker(w, x, y, dir)
@@ -119,15 +124,36 @@ function generateWalls(self, tilemap)
 	end)
 end
 
-local function randomFloor(wallTilemap)
-	if wallTilemap.floors then
-		return unpack(wallTilemap.floors[math.random(#wallTilemap.floors)])
+local function generateSpawns(self, tilemap)
+	local spawns = {}
+	for _,spawn in ipairs(self.spawns) do
+		for i=1,spawn[1] do
+			table.insert(spawns, {unpack(spawn, 2)})
+		end
+	end
+	U.shuffle(spawns)
+
+	local env = getfenv(0)
+	for _,spawn in ipairs(spawns) do
+		local Spawn, r, dest = unpack(spawn)
+		local x, y = tilemap:randomFloor(r)
+		if x then
+			local obj = Spawn(x, y)
+			if env[dest] then
+				table.insert(env[dest], obj)
+			else
+				env[dest] = obj
+			end
+		end
 	end
 end
 
-function Map.generate(self, wallTilemap)
-	self.walkers = {Walker(self, 0, 0, 0)}
-	self.floor = Grid(wallTilemap.unit)
+function Map.generate(self, wallTilemap, col, row)
+	local unit = wallTilemap.unit
+	col, row = col or 0, row or 0
+	local x, y = col * unit, row * unit
+	self.walkers = {Walker(self, col, row, 0)}
+	self.floor = Grid(unit)
 	self.floorCount = 0
 
 	while(self.floorCount < self.limit) do
@@ -141,7 +167,11 @@ function Map.generate(self, wallTilemap)
 		table.insert(tiles, {x, y})
 	end)
 	wallTilemap.floors = tiles
-	wallTilemap.randomFloor = randomFloor
+	wallTilemap:removeNear(x, y, 5)
+
+	local rx, ry = wallTilemap:farthestFloor(x, y)
+	if rx then rescue = Segment(rx, ry) end
+	generateSpawns(self, wallTilemap)
 
 	self.walkers = nil
 	self.floor = nil

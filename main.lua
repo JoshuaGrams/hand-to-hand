@@ -4,6 +4,7 @@ local Fly = require 'enemy-fly'
 local kb = require 'scancode'
 local Music = require 'music'
 local Player = require 'player'
+local Segment = require 'segment'
 local TileMap = require 'tilemap'
 
 TURN = 2*math.pi
@@ -15,12 +16,20 @@ local function quad(img, x, y, w, h, ox, oy)
 	return { img = img, quad = q, ox = ox*w, oy = oy*h }
 end
 
-function generateSeedFromClock(debug)
+local function generateSeedFromClock()
 	local seed = os.time() + math.floor(1000 * os.clock())
 	seed = seed * seed % 1000000
 	seed = seed * seed % 1000000
-	if debug then print('Seed:', seed) end
 	return seed
+end
+
+function nextLevel()
+	shards = {}
+	enemies = {}
+	rescue = nil
+	level = math.min(level + 1, #levels)
+	local head = player:head()
+	levels[level]:generate(blocks, blocks:fromPixel(head.x, head.y))
 end
 
 function love.load()
@@ -66,10 +75,11 @@ function love.load()
 	camera = Camera.new(0, 0, 1.8*w*h)
 
 	shards = {}
+	enemies = {}
 
-	local aliens = {image.alien.blue, image.alien.green, image.alien.pink}
-	player = Player(0, 0, -TURN/4, aliens, image.shard)
-	for i=1,2 do player:addSegment(0, 0, -TURN/4) end
+	Segment.images = {image.alien.blue, image.alien.green, image.alien.pink}
+	Segment.shardImage = image.shard
+	player = Player(0, 0, -TURN/4)
 
 	blocks = TileMap(image.blocks, 256, 32, {
 		'sand', 'soil', 'grass',
@@ -77,15 +87,18 @@ function love.load()
 	})
 
 	levels = {
-		require 'levels/1'
+		require 'levels/1',
+		require 'levels/2',
+		require 'levels/3',
+		require 'levels/4',
+		require 'levels/5',
+		require 'levels/6'
 	}
-	levels[1]:generate(blocks)
+	level = 0
+	nextLevel()
 
-	enemies = {}
-	local fish = Enemy(frames.fish, 100, 100, 0, 1, 1/5)
-	local fly = Fly(blocks:randomFloor())
-	table.insert(enemies, fish)
-	table.insert(enemies, fly)
+	-- local fish = Enemy(frames.fish, 100, 100, 0, 1, 1/5)
+	-- table.insert(enemies, fish)
 end
 
 
@@ -98,6 +111,9 @@ function love.update(dt)
 		fire = love.keyboard.isScancodeDown('space')
 	}
 	player:update(dt, control, blocks)
+	if rescue then
+		rescue.th = rescue.th + math.pi/2 * dt
+	end
 
 	local head = player:head()
 	camera:follow(head.x, head.y, dt, 0.4, 0.95)
@@ -165,6 +181,7 @@ function love.draw()
 	end
 	
 	player:draw()
+	if rescue then rescue:draw() end
 
 	for _,shard in ipairs(shards) do
 		shard:draw()
@@ -180,8 +197,6 @@ function love.keypressed(k, s)
 	local alt = love.keyboard.isDown('lalt', 'ralt')
 	if k == 'escape' then
 		love.event.quit()
-	elseif k == 'tab' then
-		levels[1]:generate(blocks)
 	elseif k == 'f11' or (alt and k == 'return') then
 		toggleFullscreen()
 	end

@@ -3,9 +3,9 @@ local U = require 'util'
 
 local Segment = Sprite:extend()
 
-function Segment.set(self, img, x, y, radians, shardImg)
+function Segment.set(self, x, y, radians)
+	local img = self.images[math.random(#self.images)]
 	Sprite.set(self, img, x, y, radians, 0.45, 0.5)
-	self.shardImg = shardImg
 	self.shards = {}
 	self.rightHanded = math.random() < 0.7
 	self.handDelay = 0.3  -- seconds
@@ -72,7 +72,7 @@ function Segment.update(self, dt, ahead)
 			self.handTimes = 0
 			local x, y = handPosition(self, #self.shards == 0)
 			local th = math.random() * 2*math.pi
-			local shard = Sprite(self.shardImg, x, y, th)
+			local shard = Sprite(self.shardImage, x, y, th)
 			shard.r = 15
 			table.insert(self.shards, shard)
 		end

@@ -31,9 +31,14 @@
 
 2.8 hours Tuesday 2019-09-10
 
-13.5 hours total
-
 
 * 2019-09-13 - 0.6 hours - music.
 * 2019-09-13 - 1.2 hours - enemy fly.
 * 2019-09-13 - 0.5 hours - enemy health.
+
+2.3 hours Friday 2019-09-13
+
+15.8 hours total
+
+
+* 2019-09-15 - 2.2 hours - rescues and multiple levels.

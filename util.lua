@@ -41,6 +41,17 @@ local function roundTo(x, unit)
 	return math.floor(0.5 + x/unit) * unit
 end
 
+-- Fisher-Yates shuffle (in-place).
+local function shuffle(l)
+	for i = #l, 2, -1 do
+		-- Note that `j == i` is a valid choice since a random
+		-- shuffle may leave some items in their original places.
+		local j = math.random(i)
+		l[j], l[i] = l[i], l[j]
+	end
+	return l
+end
+
 local function smoothOver(dt, t)
 	return 0.05^(dt/t)
 end
@@ -59,6 +70,7 @@ return {
 	mergeAxes = mergeAxes,
 	randomIn = randomIn,
 	roundTo = roundTo,
+	shuffle = shuffle,
 	smoothOver = smoothOver,
 	wrapAngle = wrapAngle
 }

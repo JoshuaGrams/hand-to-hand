@@ -6,13 +6,10 @@ local U = require 'util'
 
 local Player = Object:extend()
 
-function Player.set(self, x, y, radians, segmentImages, shardImage)
-	self.segmentImages = segmentImages
-	self.shardImage = shardImage
-
+function Player.set(self, x, y, radians)
 	self.segments = {}
 	self.maxSegments = 6
-	self:addSegment(x, y, radians)
+	self:addSegment(Segment(x, y, radians))
 
 	self.separation = 100
 	self.trail = Trail(10, self.maxSegments * self.separation)
@@ -33,12 +30,10 @@ function Player.set(self, x, y, radians, segmentImages, shardImage)
 	self.fireDelay = 0.2
 end
 
-function Player.addSegment(self, x, y, radians)
+function Player.addSegment(self, seg)
 	if #self.segments >= self.maxSegments then
 		error("You may only have " .. self.maxSegments .. " aliens in your chain.")
 	end
-	local img = self.segmentImages[math.random(#self.segmentImages)]
-	local seg = Segment(img, x, y, radians, self.shardImage)
 	table.insert(self.segments, seg)
 end
 
@@ -92,6 +87,11 @@ local function turnTowards(seg, th, k, omMax)
 	seg.th = seg.th + dth
 end
 
+local function segmentsOverlap(a, b, R)
+	local dx, dy = b.x - a.x, b.y - a.y
+	return dx*dx + dy*dy <= R*R
+end
+
 function Player.update(self, dt, control, map)
 	turnHead(self, control.turn, dt)
 	accelerateHead(self, control.accel, dt)
@@ -102,6 +102,10 @@ function Player.update(self, dt, control, map)
 			seg.x, seg.y = seg.x + self.vx * dt, seg.y + self.vy * dt
 			bounceHead(seg, self, map)
 			self.trail:add(seg.x, seg.y)
+			if rescue and segmentsOverlap(seg, rescue, 2*self.r) then
+				self:addSegment(rescue)
+				nextLevel()
+			end
 		else  -- follower
 			local x, y, th = self.trail:at(100 * (s-1))
 			seg.x, seg.y = x, y

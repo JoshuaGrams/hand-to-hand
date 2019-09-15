@@ -83,4 +83,43 @@ function TileMap.circleOverlaps(self, cx, cy, r)
 	return collisions
 end
 
+function TileMap.removeNear(self, x, y, r)
+	r = r * self.unit
+	local d2 = r * r
+	for i=#self.floors,1,-1 do
+		local fx, fy = unpack(self.floors[i])
+		local dx, dy = fx - x, fy - y
+		if dx*dx + dy*dy <= d2 then
+			table.remove(self.floors, i)
+		end
+	end
+end
+
+function TileMap.randomFloor(self, removeWithin)
+	local floors = self.floors
+	if floors and #floors > 0 then
+		local x, y = unpack(floors[math.random(#floors)])
+		self:removeNear(x, y, removeWithin or 0.5)
+		return x, y
+	end
+end
+
+function TileMap.farthestFloor(self, x, y, removeWithin)
+	local floors = self.floors or {}
+	local farthest, dist2 = false
+	for _,floor in ipairs(floors) do
+		local fx, fy = unpack(floor)
+		local dx, dy = fx - x, fy - y
+		local d2 = dx*dx + dy*dy
+		if not farthest or d2 > dist2 then
+			farthest, dist2 = floor, d2
+		end
+	end
+	if farthest then
+		local fx, fy = unpack(farthest)
+		self:removeNear(fx, fy, removeWithin or 0.5)
+		return unpack(farthest)
+	end
+end
+
 return TileMap
