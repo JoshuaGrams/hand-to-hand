@@ -156,6 +156,14 @@ function Map.generate(self, wallTilemap, col, row)
 	self.floor = Grid(unit)
 	self.floorCount = 0
 
+	if self.limit > 0 then
+		for dCol = -1,1 do
+			for dRow = -1,1 do
+				addFloor(self, col + dCol, row + dRow)
+			end
+		end
+	end
+
 	while(self.floorCount < self.limit) do
 		stepWalkers(self)
 	end
@@ -170,7 +178,7 @@ function Map.generate(self, wallTilemap, col, row)
 	wallTilemap:removeNear(x, y, 5)
 
 	local rx, ry = wallTilemap:farthestFloor(x, y)
-	if rx then rescue = Segment(rx, ry) end
+	if rx then table.insert(rescues, Segment(rx, ry)) end
 	generateSpawns(self, wallTilemap)
 
 	self.walkers = nil

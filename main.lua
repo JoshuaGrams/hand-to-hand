@@ -26,14 +26,24 @@ end
 function nextLevel()
 	shards = {}
 	enemies = {}
-	rescue = nil
+	rescues = {}
 	level = math.min(level + 1, #levels)
 	local head = player:head()
+	if not head then
+		head = Segment(0, 0, -TURN/4)
+		player:addSegment(head)
+		camera.cx, camera.cy = 0, 0
+	end
 	levels[level]:generate(blocks, blocks:fromPixel(head.x, head.y))
+	t = 0
+	message = messages[level]
 end
 
 function love.load()
 	math.randomseed(generateSeedFromClock())
+
+	font = love.graphics.newFont('font/RobotoSlab-Regular.ttf', 48)
+	love.graphics.setFont(font)
 
 	music = Music('audio/Arroz Con Pollo.mp3', 'audio/Cuban Sandwich.mp3')
 
@@ -94,6 +104,9 @@ function love.load()
 		require 'levels/5',
 		require 'levels/6'
 	}
+	messages = {'Rescue your comrades. Arrows move, space shoots.'}
+	messages[6] = 'Congratulations! You win!'
+
 	level = 0
 	nextLevel()
 
@@ -103,6 +116,7 @@ end
 
 
 function love.update(dt)
+	t = t + dt
 	music:update()
 
 	local turn, accel = kb.stick('right', 'left', 'up', 'down')
@@ -111,12 +125,21 @@ function love.update(dt)
 		fire = love.keyboard.isScancodeDown('space')
 	}
 	player:update(dt, control, blocks)
-	if rescue then
+	for i=#rescues,1,-1 do
+		local rescue = rescues[i]
 		rescue.th = rescue.th + math.pi/2 * dt
+		if rescue.t then
+			rescue.t = rescue.t - dt * rescue.dt
+			if rescue.t <= 0 then
+				table.remove(rescues, i)
+			end
+		end
 	end
 
 	local head = player:head()
-	camera:follow(head.x, head.y, dt, 0.4, 0.95)
+	if head then
+		camera:follow(head.x, head.y, dt, 0.4, 0.95)
+	end
 
 	local delete = {}
 	for i,shard in ipairs(shards) do
@@ -181,10 +204,37 @@ function love.draw()
 	end
 	
 	player:draw()
-	if rescue then rescue:draw() end
+	for _,rescue in ipairs(rescues) do
+		if rescue.t then
+			local x, y = rescue.x, rescue.y
+			local k = 20 * (1 - rescue.t)
+			rescue.x = rescue.x + k * (math.random() - 0.5)
+			rescue.y = rescue.y + k * (math.random() - 0.5)
+			rescue:draw()
+			rescue.x, rescue.y = x, y
+		else
+			rescue:draw()
+		end
+	end
 
 	for _,shard in ipairs(shards) do
 		shard:draw()
+	end
+
+	if message then
+		if t < 5 then
+			local mw = font:getWidth(message)
+			local h = camera.bounds.yMax - camera.bounds.yMin
+			local x = camera.cx - mw/2
+			local y = camera.cy - h * 0.3
+			love.graphics.setColor(1, 1, 0.3)
+			love.graphics.print(message, x, y)
+		else
+			if #player.segments == 0 then
+				level = 0
+				nextLevel()
+			end
+		end
 	end
 end
 
