@@ -176,6 +176,7 @@ function Player.update(self, dt, control, map)
 			shard.vx = self.vx + self.shardSpeed * fx
 			shard.vy = self.vy + self.shardSpeed * fy
 			shard.om = U.randomIn(-7*math.pi, 7*math.pi)
+			shard.t = 5
 			table.insert(shards, shard)
 			self.fireTimer = self.fireDelay
 		end

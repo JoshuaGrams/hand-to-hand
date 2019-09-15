@@ -114,6 +114,29 @@ function love.load()
 	-- table.insert(enemies, fish)
 end
 
+local function updateFlyingShards(dt)
+	local delete = {}
+	for i,shard in ipairs(shards) do
+		shard:update(dt)
+		if #blocks:circleOverlaps(shard.x, shard.y, shard.r) > 0 then
+			table.insert(delete, i)
+		end
+		for _,enemy in ipairs(enemies) do
+			local dx, dy = enemy.x - shard.x, enemy.y - shard.y
+			local r = enemy.r + shard.r
+			if dx*dx + dy*dy <= r*r then
+				enemy:hit(1)
+				table.insert(delete, i)
+			end
+		end
+
+		shard.t = shard.t - dt
+		if shard.t <= 0 then table.insert(delete, i) end
+	end
+	for _,i in ipairs(delete) do
+		table.remove(shards, i)
+	end
+end
 
 function love.update(dt)
 	t = t + dt
@@ -141,24 +164,7 @@ function love.update(dt)
 		camera:follow(head.x, head.y, dt, 0.4, 0.95)
 	end
 
-	local delete = {}
-	for i,shard in ipairs(shards) do
-		shard:update(dt)
-		if #blocks:circleOverlaps(shard.x, shard.y, shard.r) > 0 then
-			table.insert(delete, i)
-		end
-		for _,enemy in ipairs(enemies) do
-			local dx, dy = enemy.x - shard.x, enemy.y - shard.y
-			local r = enemy.r + shard.r
-			if dx*dx + dy*dy <= r*r then
-				enemy:hit(1)
-				table.insert(delete, i)
-			end
-		end
-	end
-	for _,i in ipairs(delete) do
-		table.remove(shards, i)
-	end
+	updateFlyingShards(dt)
 
 	for i=#enemies,1,-1 do
 		local enemy = enemies[i]
