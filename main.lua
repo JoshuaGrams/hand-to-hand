@@ -109,9 +109,6 @@ function love.load()
 
 	level = 0
 	nextLevel()
-
-	-- local fish = Enemy(frames.fish, 100, 100, 0, 1, 1/5)
-	-- table.insert(enemies, fish)
 end
 
 local function updateFlyingShards(dt)

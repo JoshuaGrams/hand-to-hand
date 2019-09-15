@@ -43,3 +43,5 @@
 
 * 2019-09-15 - 2.2 hours - rescues and multiple levels.
 * 2019-09-15 - 1.1 hours - losing segments, victory/loss conditions.
+* 2019-09-15 - 0.4 hours - minor bug fixes.
+* 2019-09-15 - 0.5 hours - enemy fish.
