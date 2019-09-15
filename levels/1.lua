@@ -1,6 +1,7 @@
 local Map = require 'map'
-local Fly = require 'enemy-fly'
+local Block = require 'enemy-block'
 local Fish = require 'enemy-fish'
+local Fly = require 'enemy-fly'
 
 return Map(50, 0.05, {4, 1, 0.5, 0}, {
 	{ {0,0}, chance = 5, exits = {{1,0}, {0,1}, {-1,0}, {0,-1}} },
@@ -10,6 +11,6 @@ return Map(50, 0.05, {4, 1, 0.5, 0}, {
 		exits = {{2,0}, {0,2}, {-1,0}, {0,-1}}
 	}
 }, {
-	{3, Fly, 4, 'enemies'},
-	{3, Fish, 4, 'enemies'}
+	{2, Block, 1.5, 'enemies'},
+	{2, Fish, 4, 'enemies'}
 })
