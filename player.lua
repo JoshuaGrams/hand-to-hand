@@ -152,6 +152,7 @@ function Player.update(self, dt, control, map)
 		local s = hit[i]
 		local seg = table.remove(self.segments, s)
 		seg.t, seg.dt = 1, 1/5
+		if #self.segments == 0 then seg.t = 0.4 end
 		if s == 1 then seg.wait = true end
 		table.insert(rescues, seg)
 	end
