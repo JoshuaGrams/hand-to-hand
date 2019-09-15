@@ -101,6 +101,7 @@ local function performRescue(self, seg)
 			if rescue.wait == nil then
 				table.remove(rescues, i)
 				self:addSegment(rescue)
+				if #rescues == 0 then nextLevel() end
 			else
 				rescue.wait = false
 			end
@@ -108,7 +109,6 @@ local function performRescue(self, seg)
 			rescue.wait = nil
 		end
 	end
-	if #rescues == 0 then nextLevel() end
 end
 
 local function hitEnemy(self, seg)
