@@ -42,6 +42,8 @@ end
 function love.load()
 	math.randomseed(generateSeedFromClock())
 
+	hasFocus = true
+
 	font = love.graphics.newFont('font/RobotoSlab-Regular.ttf', 48)
 	love.graphics.setFont(font)
 
@@ -130,6 +132,7 @@ local function updateFlyingShards(dt)
 end
 
 function love.update(dt)
+	if not hasFocus then return end
 	t = t + dt
 	music:update()
 
@@ -246,5 +249,17 @@ function love.keypressed(k, s)
 		love.event.quit()
 	elseif k == 'f11' or (alt and k == 'return') then
 		toggleFullscreen()
+	end
+end
+
+function love.focus(focus)
+	hasFocus = focus
+	if focus then
+		if pausedSources then
+			love.audio.play(pausedSources)
+			pausedSources = nil
+		end
+	else
+		pausedSources = love.audio.pause()
 	end
 end
