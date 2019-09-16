@@ -38,11 +38,14 @@
 
 2.3 hours Friday 2019-09-13
 
-15.8 hours total
-
 
 * 2019-09-15 - 2.2 hours - rescues and multiple levels.
 * 2019-09-15 - 1.1 hours - losing segments, victory/loss conditions.
 * 2019-09-15 - 0.4 hours - minor bug fixes.
 * 2019-09-15 - 0.5 hours - enemy fish.
 * 2019-09-15 - 0.5 hours - enemy block.
+* 2019-09-15 - 0.6 hours - generate different levels, tweak enemies.
+
+5.3 hours Sunday 2019-09-15
+
+21.6 hours total

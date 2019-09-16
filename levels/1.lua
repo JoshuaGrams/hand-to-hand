@@ -2,14 +2,11 @@ local Map = require 'map'
 local Block = require 'enemy-block'
 local Fish = require 'enemy-fish'
 local Fly = require 'enemy-fly'
+local Room = require('rooms')
 
 return Map(50, 0.05, {4, 1, 0.5, 0}, {
-	{ {0,0}, chance = 5, exits = {{1,0}, {0,1}, {-1,0}, {0,-1}} },
-	{
-		{0,0}, {1, 0}, {0,1}, {1,1},
-		chance = 2,
-		exits = {{2,0}, {0,2}, {-1,0}, {0,-1}}
-	}
+	Room('single', 5),
+	Room('quad', 2)
 }, {
 	{2, Block, 1.5, 'enemies'},
 	{2, Fish, 4, 'enemies'}

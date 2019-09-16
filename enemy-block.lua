@@ -25,7 +25,7 @@ function Block.set(self, x, y)
 	c, r = (s + 0.5) * c, (s + 0.5) * r
 	self.start = {blocks:toPixel(col, row)}
 	self.finish = {blocks:toPixel(col + c, row + r)}
-	self.speed = 250
+	self.speed = 300
 end
 
 function Block.ai(self, dt)

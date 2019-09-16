@@ -1,13 +1,12 @@
 local Map = require 'map'
+local Block = require 'enemy-block'
 local Fly = require 'enemy-fly'
+local Room = require 'rooms'
 
-return Map(50, 0.05, {4, 1, 0.5, 0}, {
-	{ {0,0}, chance = 5, exits = {{1,0}, {0,1}, {-1,0}, {0,-1}} },
-	{
-		{0,0}, {1, 0}, {0,1}, {1,1},
-		chance = 2,
-		exits = {{2,0}, {0,2}, {-1,0}, {0,-1}}
-	}
+return Map(80, 0.02, {4, 1, 0, 0}, {
+	Room('nine', 5),
+	Room('quad', 2)
 }, {
+	{8, Block, 1, 'enemies'},
 	{9, Fly, 3, 'enemies'}
 })
