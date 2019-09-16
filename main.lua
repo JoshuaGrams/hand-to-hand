@@ -56,12 +56,6 @@ function love.load()
 			blue = love.graphics.newImage('img/alien-blue.png'),
 			pink = love.graphics.newImage('img/alien-pink.png'),
 		},
-		gem = {
-			green = love.graphics.newImage('img/gem-green.png'),
-			red = love.graphics.newImage('img/gem-red.png'),
-			blue = love.graphics.newImage('img/gem-blue.png'),
-			yellow = love.graphics.newImage('img/gem-yellow.png'),
-		},
 		enemies = love.graphics.newImage('img/enemies.png')
 	}
 
