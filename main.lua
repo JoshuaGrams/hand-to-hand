@@ -115,7 +115,7 @@ local function updateFlyingShards(dt)
 		for _,enemy in ipairs(enemies) do
 			local dx, dy = enemy.x - shard.x, enemy.y - shard.y
 			local r = enemy.r + shard.r
-			if dx*dx + dy*dy <= r*r then
+			if not enemy.dead and dx*dx + dy*dy <= r*r then
 				enemy:hit(1)
 				table.insert(delete, i)
 			end
