@@ -180,6 +180,15 @@ function Player.update(self, dt, control, map)
 			shard.om = U.randomIn(-7*math.pi, 7*math.pi)
 			shard.t = 5
 			table.insert(shards, shard)
+			for _,source in ipairs(sources.flight) do
+				if not source:isPlaying() then
+					shard.source = source
+					source:setLooping(true)
+					source:setPitch(U.randomIn(0.8, 1.2))
+					source:play()
+					break
+				end
+			end
 			self.fireTimer = self.fireDelay
 		end
 	end

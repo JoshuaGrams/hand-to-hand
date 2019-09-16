@@ -74,6 +74,14 @@ function love.load()
 		block = {quad(img, 21, 162, 106, 106)}
 	}
 
+	sources = {
+		flight = {
+			love.audio.newSource('audio/flight.wav', 'static'),
+			love.audio.newSource('audio/flight.wav', 'static'),
+			love.audio.newSource('audio/flight.wav', 'static')
+		}
+	}
+
 	local w, h = love.graphics.getDimensions()
 	unit = math.min(w, h) / 3.5
 	noiseUnit = 43/17
@@ -127,7 +135,11 @@ local function updateFlyingShards(dt)
 		if shard.t <= 0 then table.insert(delete, i) end
 	end
 	for _,i in ipairs(delete) do
-		table.remove(shards, i)
+		local shard = table.remove(shards, i)
+		if shard.source then
+			shard.source:stop()
+			shard.source = nil
+		end
 	end
 end
 
