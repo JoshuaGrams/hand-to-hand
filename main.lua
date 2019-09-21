@@ -134,8 +134,8 @@ local function updateFlyingShards(dt)
 		shard.t = shard.t - dt
 		if shard.t <= 0 then table.insert(delete, i) end
 	end
-	for d=#delete,1,-1 do
-		local i = delete[d]
+	table.sort(delete, function(a, b) return a > b end)
+	for _,i in ipairs(delete) do
 		local shard = table.remove(shards, i)
 		if shard.source then
 			shard.source:stop()
